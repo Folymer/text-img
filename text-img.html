@@ -1,0 +1,138 @@
+<!--
+    @license
+    Copyright (c) 2014 The Polymer Project Authors. All rights reserved.
+    This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+    The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+    The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+    Code distributed by Google as part of the polymer project is also
+    subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../polymer/polymer.html">
+
+<!--
+Element providing solution to no problem in particular.
+
+##### Example
+
+    <text-img></text-img>
+
+@element text-img
+@blurb Element providing solution to no problem in particular.
+@status alpha
+@homepage http://polymerlabs.github.io/text-img
+-->
+<polymer-element name="text-img">
+
+  <template>
+
+    <style>
+      :host {
+        display: block;
+      }
+
+      .img{
+        width: 100%;
+      }
+
+      .img-wrap{
+        position: absolute;
+        display: block;
+      }
+
+      polyfill-next-selector { content: ':host :not([margin-keep])'; }
+      ::content :not([margin-keep]) {
+        margin: 0px;
+      }
+    </style>
+
+    <img class="img" id="img" src="{{src}}"></img>
+    <div class="img-wrap" id="img_wrap">
+      <content><content>
+    </div>
+
+  </template>
+
+  <script src="../jquery/dist/jquery.min.js"></script>
+
+  <script>
+
+    Polymer({
+      ready: function() {
+        this.$.img.addEventListener('load', this.textResize.bind(this));
+      },
+      textResize: function(){
+        var $img            = this.$.img;
+        var $img_wrap       = this.$.img_wrap;
+        var $text_container = this.$.text_container;
+
+        var height  = $img.offsetHeight;
+        var width   = $img.offsetWidth;
+        var top     = $img.offsetTop;
+        var left    = $img.offsetLeft;
+
+        var img_wrap_style = $img_wrap.style;
+        img_wrap_style.height = height + 'px';
+        img_wrap_style.width  = width + 'px';
+        img_wrap_style.top    = top + 'px';
+        img_wrap_style.left   = left + 'px';
+
+        var container_list = this.querySelectorAll(':scope > *');
+        var len = container_list.length;
+        var container, container_style, i;
+        for(i = 0 ; i < len ; i ++){
+          container = container_list[i];
+          container_style = container.style
+          
+          var container_outerWidth  = container.offsetWidth;
+          var container_outerHeight = container.offsetHeight;
+
+          var _container_position = container.getAttribute('text-position');
+          var container_position = (_container_position) ? _container_position.split(' ') : ['left', 'top'];
+          var container_left     = container_position[0];
+          var container_top      = container_position[1];
+
+          container_style.display = 'block';
+          container_style.position = 'absolute';
+
+          switch(container_left){
+            case 'left':
+              container_style.left = '0px';
+            break;
+            case 'right':
+              container_style.left = (width - container_outerWidth) + 'px';
+            break;
+            case 'center':
+              container_style.left = (width/2 - container_outerWidth/2) + 'px';
+            break;
+          }
+
+          switch(container_top){
+            case 'top':
+              container_style.top = '0px';
+            break;
+            case 'bottom':
+              container_style.top = (height - container_outerHeight) + 'px';
+            break;
+            case 'center':
+              container_style.top = (height/2 - container_outerHeight/2) + 'px';
+            break;
+          }
+        }
+
+        this.fire('textResize');
+      },
+      test:0,
+      testChanged: function(o, n){
+        console.log(this.test, o, n);
+        this.test = 1;
+      },
+
+      publish:{
+        'src'           : ''
+      }
+
+    });
+
+  </script>
+
+</polymer-element>
